@@ -78,8 +78,8 @@ delimiter $$
 create procedure ActualizarPrecios(porcentaje int)
 begin
 	update producto as p set precio = Precio*((porcentaje/100)+1) 
-	where (select sum(cantidad) from item where idproducto=p.idproducto)>10;
-	select 'Precios actualizados'
+	where (select sum(cantidad) from item where idproducto=p.idproducto)>10
+	select 'Precios actualizados';
 end $$
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ declare idsuc,idprod,idstockk int;
 		else
 			select 'No se encuentra el Producto';
 		end if;
-		
+	
 end $$
 
 set SQL_SAFE_UPDATES=0; // para que deje modificar;

@@ -6,8 +6,8 @@
 2)
     select c.* from venta as v
     inner join cliente as c on c.idCliente = v.idCliente
-    inner join sucursal as s on v.idSucursal = s.idSucursal
-    where s.Nombre = 'SAXONN S.A.';
+    inner join sucursal as sSucursal = s.idSucursal
+    where s.Nombre = 'SAXONN S.A.'; on v.id
 
 ////////////////////////////////////////////////////////////////////////
 3)
@@ -52,13 +52,32 @@
 
 ///////////////////////////////////////////////////////////////////////
 8)
-    select s.nombre,p.*,sum(i.cantidad) as suma  
-    from venta as v
-    inner join sucursal as s on v.idsucursal = s.idsucursal
-    inner join item as i on i.iditem = v.iditems
-    inner join producto as p on i.idproducto = p.idproducto
-    group by s.idsucursal
-    order by s.idsucursal;
+   select v.idventa,s.idsucursal,i.idproducto, sum(i.cantidad) as suma from venta as v
+    inner join sucursal as s on v.idsucursal=s.idsucursal
+    inner join item as i on v.iditems=i.iditem
+    group by s.idsucursal,i.idproducto
+    having (select sum(it.cantidad) as cant from venta as ve
+    inner join item as it on ve.iditems=it.iditem
+    where ve.idsucursal=s.idsucursal
+    group by it.idproducto 
+    order by cant desc
+    limit 1) = suma;
+
+//////////////////////////////////////////////////////////////////////
+9)
+    select  s.idsucursal,v.idcliente,sum(i.cantidad*p.precio) as suma from venta as v
+    inner join sucursal as s on v.idsucursal=s.idsucursal
+    inner join item as i on v.iditems=i.iditem
+    inner join cliente as c on c.idcliente=v.idcliente
+    inner join producto as p on p.idproducto=i.idproducto
+    group by s.idsucursal,c.idcliente
+    having (select sum(it.cantidad*pr.precio) as cant from venta as ve
+    inner join item as it on ve.iditems=it.iditem
+    inner join producto as pr on it.idproducto= pr.idproducto
+    where ve.idsucursal=s.idsucursal
+    group by ve.idcliente
+    order by cant desc
+    limit 1) = suma
 
 //////////////////////////////////////////////////////////////////////
 10)
@@ -69,10 +88,28 @@
 
 //////////////////////////////////////////////////////////////////////
 12)
-     SELECT s.Nombre, MAX(i.cantidad*p.Precio) AS MEJOR, MIN(I.cantidad*p.Precio) AS PEOR 
-     FROM venta v 
-     INNER JOIN sucursal s ON (s.idSucursal = v.idSucursal) 
-     INNER JOIN item i ON (i.idVenta = v.idVenta) 
-     INNER JOIN producto p ON (p.idProducto = i.idProducto) 
-     GROUP BY s.idsucursal 
-     ORDER BY s.idsucursal ASC;
+     (select  s.idsucursal,v.idventa, sum(i.cantidad*p.precio) as mejor from venta as v
+    inner join sucursal as s on v.idsucursal=s.idsucursal
+    inner join item as i on v.iditems=i.iditem
+    inner join producto as p on p.idproducto=i.idproducto
+    group by s.idsucursal,v.idventa
+    having (select sum(it.cantidad*pr.precio) as cant from venta as ve
+    inner join item as it on ve.iditems=it.iditem
+    inner join producto as pr on it.idproducto= pr.idproducto
+    where ve.idsucursal=s.idsucursal
+    group by ve.idventa
+    order by cant desc
+    limit 1) = mejor)
+    union all
+    (select  suc.idsucursal,ven.idventa,sum(ite.cantidad*pro.precio) as peor from venta as ven
+    inner join sucursal as suc on ven.idsucursal=suc.idsucursal
+    inner join item as ite on ven.iditems=ite.iditem
+    inner join producto as pro on pro.idproducto=ite.idproducto
+    group by suc.idsucursal,ven.idventa
+    having (select sum(it.cantidad*pr.precio) as cant from venta as ve
+    inner join item as it on ve.iditems=it.iditem
+    inner join producto as pr on it.idproducto= pr.idproducto
+    where ve.idsucursal=suc.idsucursal
+    group by ve.idventa
+    order by cant asc
+    limit 1)=peor)
