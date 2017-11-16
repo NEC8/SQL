@@ -1,5 +1,5 @@
 
-1)
+1) Bien
 delimiter $$
 CREATE PROCEDURE CargarCliente (nombree varchar(30), apellidoo varchar(30), dnii int, dir varchar(45))
 begin
@@ -12,7 +12,7 @@ begin
 		end if;
  end $$
 ///////////////////////////////////////////////////////////////////
-2)))
+2))) Bien
 
 delimiter $$
 drop procedure AsignarVendedor $$
@@ -45,7 +45,7 @@ end $$
 call AsignarVendedor('LUGO S.A.', '4049118933');
 
 ///////////////////////////////////////////////////////////////////
-3)))
+3))) bien
 CREATE DEFINER=`root`@`localhost` PROCEDURE `AgregarItemVenta`(IdVentaa int, NombreProductoo varchar(30), Cantidadd int)
 begin
 declare idproductoo,idsucursall,iditemm int;
@@ -72,7 +72,7 @@ select Cantidad from Stock where idProducto=873 and idSucursal=697
 
 //////////////////////////////////////////////////////////////////////////////////
 
-4)))
+4))) Bien
 
 delimiter $$
 create procedure ActualizarPrecios(porcentaje int)
@@ -84,7 +84,7 @@ end $$
 
 //////////////////////////////////////////////////////////////////////////////////
 
-5)))
+5))) Bien
 
 delimiter $$
 create procedure AltaStock(NombreSucursall char(45),NombreProductoo char(45), Cantidadd int)
@@ -93,24 +93,23 @@ declare idsuc,idprod,idstockk int;
 		if exists( select idSucursal from sucursal where NombreSucursall=Nombre) then
 			set idsuc = (select idSucursal from sucursal where Nombre=NombreSucursall limit 1);
 			if exists(select idproducto from producto where Nombre=NombreProductoo) then
-			set idprod = (select idproducto from producto where Nombre=NombreProductoo);
-	if exists (select st.idStock from producto as p 
-	inner join stock as st on p.idProducto=st.idProducto
-	inner join sucursal as s on s.idSucursal=st.idSucursal 
-	where (s.Nombre=NombreSucursall) and (p.Nombre=NombreProductoo)) then
-		
-		update  stock set cantidad = cantidad + cantidadd where idSucursal=idsuc and idProducto	=idprod;
-	else 
-		set idstockk=(select max (idStock) from Stock)+1;
-		insert into item values (idstockk,Cantidadd,idsuc,idprod);
-	end if;
-		else
-		select 'No se encuentra la Sucursal';
+				set idprod = (select idproducto from producto where Nombre=NombreProductoo);
+				if exists (select st.idStock from producto as p 
+						inner join stock as st on p.idProducto=st.idProducto
+						inner join sucursal as s on s.idSucursal=st.idSucursal 
+						where (s.Nombre=NombreSucursall) and (p.Nombre=NombreProductoo)) then
+	
+					update  stock set cantidad = cantidad + cantidadd where idSucursal=idsuc and idProducto	=idprod;
+				else 
+					set idstockk=(select max (idStock) from Stock)+1;
+					insert into item values (idstockk,Cantidadd,idsuc,idprod);
+				end if;
+			else
+				select 'No se encuentra la Sucursal';
 		end if;
 		else
 			select 'No se encuentra el Producto';
 		end if;
-	
 end $$
 
 set SQL_SAFE_UPDATES=0; // para que deje modificar;
